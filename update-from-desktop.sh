@@ -31,6 +31,15 @@ find "$ROOT" -path "$ROOT/.git" -prune -o \
   -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) -size +8M \
   -exec sips -Z 2400 {} \; >/dev/null
 
+for png in "$ROOT"/media/book/kanji-*.png; do
+  [ -e "$png" ] || continue
+  jpg="${png%.png}.jpg"
+  sips -s format jpeg -s formatOptions 75 "$png" --out "$jpg" >/dev/null
+done
+
+perl -0pi -e 's#media/book/kanji-(\d\d)\.png(?:\?v=[A-Za-z0-9]+)?#media/book/kanji-$1.jpg#g; s#Fb=""\+new URL\("kanji-16-BiAvSj36\.png",import\.meta\.url\)\.href#Fb="media/book/kanji-16.jpg"#' "$ROOT"/assets/index-*.js
+rm -f "$ROOT"/media/book/kanji-*.png "$ROOT"/assets/kanji-16-BiAvSj36.png
+
 too_large="$(find "$ROOT" -path "$ROOT/.git" -prune -o -type f -size +24M -print)"
 if [ -n "$too_large" ]; then
   printf 'These files are still too large for Cloudflare Pages/Workers:\n%s\n' "$too_large" >&2
