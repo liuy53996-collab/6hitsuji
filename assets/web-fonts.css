@@ -1,0 +1,4 @@
+/* 公开网络字体：浏览器会在首次访问时下载，并使用缓存。 */
+:root {
+  font-family: Inter, "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Microsoft YaHei", "Noto Sans JP", "Noto Sans SC", sans-serif;
+}

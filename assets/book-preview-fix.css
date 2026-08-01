@@ -1,0 +1,14 @@
+/* 右页在鼠标静止时也显示下一页预览；翻页动画进行中保持隐藏，避免显示上一组页面。 */
+@media (hover: hover) and (pointer: fine) {
+  .book-shell:has(.book-flip-sheet) .book-next-strip {
+    opacity: 0 !important;
+    transform: translate(calc(100% - 10px)) !important;
+  }
+
+  .book-shell:not(:has(.book-flip-sheet)):has(.book-page--right:hover) .book-next-strip {
+    border-width: 4px;
+    opacity: 1;
+    transform: translate(0);
+    box-shadow: 18px 22px 34px #3d24102e, inset 10px 0 18px #3d24102e;
+  }
+}
