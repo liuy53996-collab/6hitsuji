@@ -53,7 +53,7 @@
       }
 
       const imageBounds = image.getBoundingClientRect();
-      const lensSize = 180;
+      const lensSize = 220;
       const magnification = 2.25;
       const pointerX = event.clientX - imageBounds.left;
       const pointerY = event.clientY - imageBounds.top;
