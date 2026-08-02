@@ -29,16 +29,24 @@ perl -0pi -e 's/\.mov/\.mp4/g' "$ROOT"/assets/index-*.js "$ROOT/index.html"
 
 find "$ROOT" -path "$ROOT/.git" -prune -o \
   -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) -size +8M \
+  ! -path "$ROOT/media/book/kanji-*" \
+  ! -path "$ROOT/media/book/tokyo-*" \
   -exec sips -Z 2400 {} \; >/dev/null
 
 for png in "$ROOT"/media/book/kanji-*.png; do
   [ -e "$png" ] || continue
   jpg="${png%.png}.jpg"
-  sips -Z 2400 -s format jpeg -s formatOptions 78 "$png" --out "$jpg" >/dev/null
+  sips -Z 3600 -s format jpeg -s formatOptions 90 "$png" --out "$jpg" >/dev/null
 done
 
-perl -0pi -e 's#media/book/kanji-(\d\d)\.png(?:\?v=[A-Za-z0-9]+)?#media/book/kanji-$1.jpg#g; s#Fb=""\+new URL\("kanji-16-BiAvSj36\.png",import\.meta\.url\)\.href#Fb="media/book/kanji-16.jpg"#' "$ROOT"/assets/index-*.js
-rm -f "$ROOT"/media/book/kanji-*.png "$ROOT"/assets/kanji-16-BiAvSj36.png
+for png in "$ROOT"/media/book/tokyo-*.png; do
+  [ -e "$png" ] || continue
+  jpg="${png%.png}.jpg"
+  sips -Z 3600 -s format jpeg -s formatOptions 90 "$png" --out "$jpg" >/dev/null
+done
+
+perl -0pi -e 's#media/book/kanji-(\d\d)\.png(?:\?v=[A-Za-z0-9]+)?#media/book/kanji-$1.jpg#g; s#media/book/tokyo-(\d\d)\.png(?:\?v=[A-Za-z0-9]+)?#media/book/tokyo-$1.jpg#g; s#Fb=""\+new URL\("kanji-16-BiAvSj36\.png",import\.meta\.url\)\.href#Fb="media/book/kanji-16.jpg"#; s#""\+new URL\("tokyo-(\d\d)-[^"]+\.png",import\.meta\.url\)\.href#"media/book/tokyo-$1.jpg"#g' "$ROOT"/assets/index-*.js
+rm -f "$ROOT"/media/book/kanji-*.png "$ROOT"/media/book/tokyo-*.png "$ROOT"/assets/kanji-16-BiAvSj36.png "$ROOT"/assets/tokyo-*.png
 
 too_large="$(find "$ROOT" -path "$ROOT/.git" -prune -o -type f -size +24M -print)"
 if [ -n "$too_large" ]; then
