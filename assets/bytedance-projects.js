@@ -22,6 +22,96 @@
     view.remove();
   }
 
+  function setupBookMagnifier() {
+    const supportsMouseMagnifier = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    );
+    if (!supportsMouseMagnifier.matches) return;
+
+    const magnifier = document.createElement("div");
+    magnifier.className = "book-magnifier";
+    magnifier.setAttribute("aria-hidden", "true");
+    document.body.append(magnifier);
+
+    const hideMagnifier = () => magnifier.classList.remove("is-visible");
+    let lastMouseEvent;
+
+    const updateMagnifier = (event) => {
+      const page = document
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest(".book-page");
+      const image = page?.querySelector("img");
+      const bookShell = page?.closest(".book-shell");
+      if (
+        !image ||
+        !image.complete ||
+        !image.naturalWidth ||
+        bookShell?.querySelector(".book-flip-sheet")
+      ) {
+        hideMagnifier();
+        return;
+      }
+
+      const imageBounds = image.getBoundingClientRect();
+      const lensSize = 180;
+      const magnification = 2.25;
+      const pointerX = event.clientX - imageBounds.left;
+      const pointerY = event.clientY - imageBounds.top;
+
+      magnifier.style.left = `${event.clientX - lensSize / 2}px`;
+      magnifier.style.top = `${event.clientY - lensSize / 2}px`;
+      magnifier.style.backgroundImage = `url("${image.currentSrc || image.src}")`;
+      magnifier.style.backgroundSize = `${imageBounds.width * magnification}px ${imageBounds.height * magnification}px`;
+      magnifier.style.backgroundPosition = `${lensSize / 2 - pointerX * magnification}px ${lensSize / 2 - pointerY * magnification}px`;
+      magnifier.classList.add("is-visible");
+    };
+
+    document.addEventListener("pointermove", (event) => {
+      if (event.pointerType !== "mouse") return;
+
+      lastMouseEvent = event;
+      updateMagnifier(event);
+    });
+
+    document.addEventListener("pointerout", (event) => {
+      if (event.pointerType !== "mouse") return;
+
+      const page = event.target.closest(".book-page");
+      if (page && !page.contains(event.relatedTarget)) hideMagnifier();
+    });
+
+    document.addEventListener(
+      "animationstart",
+      (event) => {
+        if (event.target.matches?.(".book-flip-sheet")) hideMagnifier();
+      },
+      true,
+    );
+
+    document.addEventListener(
+      "animationend",
+      (event) => {
+        if (!event.target.matches?.(".book-flip-sheet") || !lastMouseEvent) return;
+
+        window.requestAnimationFrame(() => updateMagnifier(lastMouseEvent));
+      },
+      true,
+    );
+
+    const flipObserver = new MutationObserver((mutations) => {
+      const flipSheetChanged = mutations.some((mutation) =>
+        [...mutation.addedNodes, ...mutation.removedNodes].some(
+          (node) => node.nodeType === Node.ELEMENT_NODE && node.classList.contains("book-flip-sheet"),
+        ),
+      );
+      if (!flipSheetChanged || !lastMouseEvent) return;
+
+      window.requestAnimationFrame(() => updateMagnifier(lastMouseEvent));
+    });
+
+    flipObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
   function openProject(project) {
     const existing = document.querySelector(".bytedance-project-view");
     if (existing) closeProject(existing);
@@ -156,4 +246,5 @@
   navigationLabelObserver.observe(document.body, { childList: true, subtree: true });
 
   updateByteDanceCards();
+  setupBookMagnifier();
 })();

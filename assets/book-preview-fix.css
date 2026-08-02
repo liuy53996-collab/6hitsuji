@@ -1,5 +1,42 @@
 /* 右页在鼠标静止时也显示下一页预览；翻页动画进行中保持隐藏，避免显示上一组页面。 */
 @media (hover: hover) and (pointer: fine) {
+  .book-magnifier {
+    position: fixed;
+    z-index: 100;
+    width: 180px;
+    height: 180px;
+    border: 4px solid var(--yellow);
+    border-radius: 50%;
+    box-sizing: border-box;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    box-shadow: 0 12px 28px rgba(61, 36, 16, 0.28);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+
+  .book-magnifier::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: calc(50% + 58px);
+    left: calc(50% + 62px);
+    width: 28px;
+    height: 8px;
+    border-radius: 0 999px 999px 0;
+    background: var(--yellow);
+    box-shadow: 5px 8px 8px -5px rgba(61, 36, 16, 0.28);
+    transform: rotate(45deg);
+    transform-origin: left center;
+  }
+
+  .book-magnifier.is-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .book-shell:has(.book-flip-sheet) .book-next-strip {
     opacity: 0 !important;
     transform: translate(calc(100% - 10px)) !important;
